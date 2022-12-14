@@ -1,16 +1,33 @@
-require('dotenv').config();
+// import important parts of sequelize library
+const { Model, DataTypes } = require('sequelize');
+// import our database connection from config.js
+const sequelize = require('../config/connection.js');
 
-const Sequelize = require('sequelize');
+// Initialize Product model (table) by extending off Sequelize's Model class
+class Tag extends Model {}
 
-const sequelize = process.env.JAWSDB_URL
-  ? new Sequelize(process.env.JAWSDB_URL)
-  : new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
-      host: 'localhost',
-      dialect: 'mysql',
-      dialectOptions: {
-        decimalNumbers: true,
-      },
-    });
+// set up fields and rules for Tag model
+Tag.init(
+  {
+    // define columns
+    id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    tag_name: {
+      type: DataTypes.STRING
+    }
 
-module.exports = sequelize;
+  },
+  {
+    sequelize,
+    timestamps: false,
+    freezeTableName: true,
+    underscored: true,
+    modelName: 'tag',
+  }
+);
+module.exports = Tag;
 
