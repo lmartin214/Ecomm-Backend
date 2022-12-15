@@ -4,15 +4,34 @@ const { Product, Category, Tag, ProductTag } = require('../../models');
 // The `/api/products` endpoint
 
 // get all products
-router.get('/', (req, res) => {
-  // find all products
-  // be sure to include its associated Category and Tag data
+router.get('/', async (req, res) => {
+  //all products
+  //included its associated Category and Tag data
+  try {
+    const allProduct = await Product.findAll({
+     include: [{ model: Category }, { model: Tag }], // w/ associated Categories and Tags
+    });
+    res.status(200).json(allProduct);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 // get one product
-router.get('/:id', (req, res) => {
-  // find a single product by its `id`
-  // be sure to include its associated Category and Tag data
+router.get('/:id', async (req, res) => {
+  //a single product by its `id`
+  //included its associated Category and Tag data
+  try {
+    // Get one product by ID
+    const oneProduct = await Product.findByPk(req.params.id, {
+      include: [{ model: Category }, { model: Tag }], // w/ associated Categories and Tags
+    });
+    // Respond with queried content
+    res.status(200).json(oneProduct);
+  } catch (err) {
+    // Send back the error if one is thrown
+    res.status(500).json(err);
+  }
 });
 
 // create new product
@@ -29,13 +48,13 @@ router.post('/', (req, res) => {
     .then((product) => {
       // if there's product tags, we need to create pairings to bulk create in the ProductTag model
       if (req.body.tagIds.length) {
-        const productTagIdArr = req.body.tagIds.map((tag_id) => {
+        const newProduct = req.body.tagIds.map((tag_id) => {
           return {
             product_id: product.id,
             tag_id,
           };
         });
-        return ProductTag.bulkCreate(productTagIdArr);
+        return ProductTag.bulkCreate(newProduct);
       }
       // if no product tags, just respond
       res.status(200).json(product);
@@ -56,7 +75,7 @@ router.put('/:id', (req, res) => {
     },
   })
     .then((product) => {
-      // find all associated tags from ProductTag
+      //all associated tags from ProductTag
       return ProductTag.findAll({ where: { product_id: req.params.id } });
     })
     .then((productTags) => {
